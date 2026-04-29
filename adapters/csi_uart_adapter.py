@@ -1,20 +1,18 @@
-import socket
+import serial
+import time
+import random
 
-class CsiEthAdapter:
-    def __init__(self, host="0.0.0.0", port=9000, buffer_size=4096):
-        self.host = host
-        self.port = port
-        self.buffer_size = buffer_size
-        self.sock = None
+# Mở cổng UART (ví dụ '/dev/ttyUSB0' trên Linux hoặc 'COM3' trên Windows)
+#ser = serial.Serial('COM3', 9600)
 
-    def open(self):
-        self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self.sock.bind((self.host, self.port))
+def generate_fake_data():
+    # Giả lập dữ liệu CSI (mỗi gói dữ liệu là 10 byte ngẫu nhiên)
+    data = random.getrandbits(8 * 10).to_bytes(10, byteorder='big')
+    return data
 
-    def read_packet(self):
-        data, addr = self.sock.recvfrom(self.buffer_size)
-        return data, addr
-
-    def close(self):
-        if self.sock:
-            self.sock.close()
+while True:
+    # Gửi dữ liệu giả mỗi 1 giây
+    fake_data = generate_fake_data()
+   # ser.write(fake_data)
+    print(f"Sent: {fake_data.hex()}")
+    time.sleep(1)  # Giả lập tốc độ truyền dữ liệu

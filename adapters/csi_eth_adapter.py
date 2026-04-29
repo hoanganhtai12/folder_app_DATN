@@ -1,20 +1,27 @@
-import socket
+import random
+import time
 
-class CsiEthAdapter:
-    def __init__(self, host="0.0.0.0", port=9000, buffer_size=4096):
-        self.host = host
-        self.port = port
-        self.buffer_size = buffer_size
-        self.sock = None
+# Hàm giả lập nhận dữ liệu CSI ngẫu nhiên
+def generate_fake_csi_data():
+    # Tạo dữ liệu ngẫu nhiên giả
+    data = random.getrandbits(8 * 10).to_bytes(10, byteorder='big')
+    elapsed_sec = time.time()  # Lấy thời gian thực tế làm elapsed_sec
+    packet_id = random.randint(1, 1000)
+    
+    return elapsed_sec, packet_id, data
 
-    def open(self):
-        self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self.sock.bind((self.host, self.port))
+# Hàm giả lập nhận và xử lý dữ liệu CSI
+def process_fake_csi_data():
+    #for _ in range(5):  # Giả lập nhận 5 gói dữ liệu
+    while True:
+        elapsed_sec, packet_id, data = generate_fake_csi_data()
+        
+        # Xử lý gói dữ liệu (in ra cho demo)
+        print(f"Processing packet {packet_id} with data {data.hex()} at {elapsed_sec} sec")
+        
+        # Giả lập việc đồng bộ dữ liệu (chờ 1 giây giữa mỗi gói dữ liệu)
+        time.sleep(0.01)
 
-    def read_packet(self):
-        data, addr = self.sock.recvfrom(self.buffer_size)
-        return data, addr
-
-    def close(self):
-        if self.sock:
-            self.sock.close()
+# Chạy thử
+if __name__ == "__main__":
+    process_fake_csi_data()
