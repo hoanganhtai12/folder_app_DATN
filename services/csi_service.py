@@ -1,15 +1,21 @@
-from pathlib import Path
-from app.core.time_utils import utc_now_iso
+# csi_service.py
+
+import threading
+from app.adapters.csi_eth_adapter import CsiEthAdapter  # Import adapter
 
 class CsiService:
-    def __init__(self, session_dir: Path):
-        self.session_dir = session_dir
-        self.csi_file = session_dir / "csi" / "receiver_eth.csv"
+    def __init__(self, session_dir, session_t0):
+        # Cập nhật constructor để nhận session_t0
+        self.csi_adapter = CsiEthAdapter(session_dir, session_t0)  # Truyền session_t0 vào CsiEthAdapter
 
-        if not self.csi_file.exists():
-            self.csi_file.write_text("timestamp_utc,source,payload\n", encoding="utf-8")
+    def start_csi_collection(self):
+        """Bắt đầu thu thập dữ liệu CSI."""
+        self.csi_thread = threading.Thread(target=self.csi_adapter.start_recording, daemon=True)
+        self.csi_thread.start()
+        print("CSI collection started.")
 
-    def write_packet(self, source: str, payload: bytes):
-        safe_payload = payload.hex()
-        with open(self.csi_file, "a", encoding="utf-8") as f:
-            f.write(f"{utc_now_iso()},{source},{safe_payload}\n")
+    def stop_csi_collection(self):
+        """Dừng thu thập dữ liệu CSI."""
+        self.csi_adapter.stop()
+        self.csi_thread.join()
+        print("CSI collection stopped.")
