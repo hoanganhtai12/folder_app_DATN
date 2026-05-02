@@ -1,28 +1,37 @@
-# from fastapi import FastAPI
-# from app.api import health
-
-# app = FastAPI(title="IoT Laptop Server")
-# app.include_router(health.router)
-
 from fastapi import FastAPI, Request
-from fastapi.responses import HTMLResponse
-from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from fastapi.staticfiles import StaticFiles
 
-from app.api import health
+import asyncio
 
-app = FastAPI(title="IoT Laptop Server")
+from app.api import sessions
+from app.api import ws
+from app.api import config
+from app.api import camera
+from app.services.recording_service import set_main_loop
 
-app.include_router(health.router)
+app = FastAPI()
+
+app.include_router(sessions.router, prefix="/sessions")
+app.include_router(config.router, prefix="/config")
+app.include_router(ws.router)
+app.include_router(camera.router)
 
 app.mount("/static", StaticFiles(directory="app/ui/static"), name="static")
+
 templates = Jinja2Templates(directory="app/ui/templates")
 
 
-@app.get("/", response_class=HTMLResponse)
+@app.on_event("startup")
+async def startup_event():
+    loop = asyncio.get_running_loop()
+    set_main_loop(loop)
+
+
+@app.get("/")
 def home(request: Request):
     return templates.TemplateResponse(
         request=request,
         name="index.html",
-        context={"request": request}
+        context={}
     )

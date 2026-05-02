@@ -1,4 +1,4 @@
-# Tạo service đọc config session
+# File này chỉ đọc danh sách kịch bản, không đọc session_config.json.
 import json
 from pathlib import Path
 from fastapi import APIRouter
@@ -15,10 +15,9 @@ def get_scenarios():
 
     scenarios = []
 
-    # data là list
     for item in data:
         scenarios.append({
-            "name": item["scenario"],   # 🔥 FIX CHÍNH
+            "name": item["scenario"],
             "label": item["scenario"]
         })
 
